@@ -16,7 +16,7 @@ cd ..
 mkdir -p pretrain && cd pretrain
 
 wget https://yubinux.cn/tmp/pt/dinov3_vitl16_pretrain_lvd1689m-8aa4cbdd.pth
-
+wget https://yubinux.cn/tmp/pt/dinov3_vitb16_pretrain_lvd1689m-73cec8be.pth
 cd ..
 
 ## verify env 

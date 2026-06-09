@@ -1,8 +1,11 @@
 """Model construction utilities for INSID3."""
 
+from __future__ import annotations
+
 import torch
 
 from models.insid3 import INSID3
+from models.onnx_encoder import ONNXEncoder
 
 _HUB_NAMES = {
     "small": "dinov3_vits16",
@@ -16,13 +19,19 @@ _WEIGHTS = {
     "large": "pretrain/dinov3_vitl16_pretrain_lvd1689m-8aa4cbdd.pth",
 }
 
+_ONNX_DEFAULT = "pretrain/onnx_weights/onnx/model_quantized.onnx"
 
-def _build_encoder(model_size: str = "large"):
-    return torch.hub.load(
+
+def _build_encoder(model_size: str = "large", onnx_path: str | None = None):
+    if onnx_path is not None:
+        return ONNXEncoder(onnx_path)
+
+    encoder = torch.hub.load(
         "facebookresearch/dinov3",
         _HUB_NAMES[model_size],
         weights=_WEIGHTS[model_size],
     )
+    return torch.compile(encoder)
 
 
 def build_insid3(
@@ -35,8 +44,9 @@ def build_insid3(
     mask_refiner: str = "bilinear",
     resize_to_orig_size: bool = True,
     device: str = "cuda",
+    onnx_path: str | None = None,
 ):
-    encoder = _build_encoder(model_size)
+    encoder = _build_encoder(model_size, onnx_path=onnx_path)
     model = INSID3(
         encoder=encoder,
         image_size=image_size,
@@ -62,4 +72,5 @@ def build_insid3_from_args(args):
         mask_refiner='crf' if getattr(args, 'crf_mask_refinement', False) else 'bilinear',
         resize_to_orig_size=False,
         device=args.device,
+        onnx_path=getattr(args, 'onnx_model', None),
     )

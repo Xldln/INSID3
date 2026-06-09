@@ -19,6 +19,13 @@ def get_args_parser() -> argparse.ArgumentParser:
         help="DINOv3 backbone size",
     )
     parser.add_argument(
+        "--onnx-model",
+        default=None,
+        type=str,
+        help="Path to ONNX model (e.g., pretrain/onnx_weights/onnx/model_quantized.onnx). "
+             "When set, overrides --model-size and uses ONNX Runtime instead of PyTorch.",
+    )
+    parser.add_argument(
         "--image-size",
         default=1024,
         type=int,
